@@ -2,6 +2,8 @@ import { deflate, inflate } from 'pako'
 
 import { wrappedSchema, type WrappedData } from './schema'
 
+const encodedReports = new WeakMap<WrappedData, string>()
+
 function toBase64Url(bytes: Uint8Array): string {
   let binary = ''
   for (let index = 0; index < bytes.length; index += 1) {
@@ -21,9 +23,14 @@ function fromBase64Url(value: string): Uint8Array {
 }
 
 export function encodeWrapped(data: WrappedData): string {
+  const cached = encodedReports.get(data)
+  if (cached) return cached
+
   const valid = wrappedSchema.parse(data)
   const bytes = new TextEncoder().encode(JSON.stringify(valid))
-  return toBase64Url(deflate(bytes, { level: 9 }))
+  const encoded = toBase64Url(deflate(bytes, { level: 9 }))
+  encodedReports.set(data, encoded)
+  return encoded
 }
 
 export function decodeWrapped(encoded: string): WrappedData {
@@ -41,5 +48,5 @@ export function readWrappedHash(hash = window.location.hash): WrappedData | null
 }
 
 export function wrappedUrl(data: WrappedData, location = window.location): string {
-  return `${location.origin}${location.pathname}#data=${encodeWrapped(data)}`
+  return `${location.origin}${location.pathname}${location.search || ''}#data=${encodeWrapped(data)}`
 }

@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 
 import { Home } from './components/Home'
-import { Story } from './components/Story'
 import { readWrappedHash } from './lib/codec'
 import type { WrappedData } from './lib/schema'
+import { loadStory } from './lib/storyLoader'
 import './App.css'
+
+const Story = lazy(loadStory)
 
 function initialData(): { data: WrappedData | null; error: string | null } {
   try {
@@ -18,12 +20,16 @@ function initialData(): { data: WrappedData | null; error: string | null } {
 }
 
 export default function App() {
-  const initial = initialData()
+  const [initial] = useState(initialData)
   const [data, setData] = useState<WrappedData | null>(initial.data)
   const [error, setError] = useState<string | null>(initial.error)
 
   if (data) {
-    return <Story initialData={data} onClose={() => setData(null)} />
+    return (
+      <Suspense fallback={<main className="story-loading" aria-label="Loading story" />}>
+        <Story initialData={data} onClose={() => setData(null)} />
+      </Suspense>
+    )
   }
 
   return (

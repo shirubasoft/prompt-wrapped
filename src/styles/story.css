@@ -153,7 +153,9 @@
   overflow: hidden;
   color: var(--scene-ink);
   background: var(--scene-bg);
+  contain: layout paint style;
   place-items: stretch;
+  will-change: transform, opacity;
 }
 
 .scene-motion::after {
@@ -163,8 +165,28 @@
   pointer-events: none;
   content: '';
   opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url('../assets/noise.png');
   mix-blend-mode: multiply;
+}
+
+.scene-motion:not(.scene-prewarm) {
+  z-index: 1;
+}
+
+.scene-prewarm {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.001;
+  pointer-events: none;
+  user-select: none;
+}
+
+.scene-prewarm *,
+.scene-prewarm *::before,
+.scene-prewarm *::after {
+  pointer-events: none !important;
+  animation-play-state: paused !important;
 }
 
 .scene-motion--intro { --scene-bg: #ff5a36; --scene-ink: #1b1345; --scene-hit: #e4ff4c; }
@@ -730,10 +752,15 @@
   transform: rotate(1.4deg);
 }
 
-.data-field > i {
-  display: block;
+.data-field > .data-mark {
+  display: grid;
   align-self: center;
   justify-self: center;
+  place-items: center;
+}
+
+.data-mark > i {
+  display: block;
   width: var(--dot-size);
   aspect-ratio: 1;
   background: #ff5a36;
@@ -743,13 +770,13 @@
   animation-delay: calc(var(--dot-index) * -42ms);
 }
 
-.data-field > i:nth-child(3n) { border-radius: 0; }
-.data-field > i:nth-child(5n) { border-radius: 50% 0 50% 0; }
-.data-field > i[data-source='1'] { background: #f2e968; }
-.data-field > i[data-source='2'] { background: #62dfe4; }
-.data-field > i[data-source='3'] { background: #9a72ed; }
-.data-field > i[data-source='4'] { background: #ff72a3; }
-.data-field > i[data-source='5'] { background: #f7f0db; }
+.data-field > .data-mark:nth-child(3n) > i { border-radius: 0; }
+.data-field > .data-mark:nth-child(5n) > i { border-radius: 50% 0 50% 0; }
+.data-mark > i[data-source='1'] { background: #f2e968; }
+.data-mark > i[data-source='2'] { background: #62dfe4; }
+.data-mark > i[data-source='3'] { background: #9a72ed; }
+.data-mark > i[data-source='4'] { background: #ff72a3; }
+.data-mark > i[data-source='5'] { background: #f7f0db; }
 
 .source-legend {
   display: flex;
@@ -1686,7 +1713,7 @@
 @media (prefers-reduced-motion: reduce) {
   .big-number-marquee span,
   .portrait-rings i,
-  .data-field > i,
+  .data-mark > i,
   .type-tunnel > span,
   .scene--top-item::before { animation: none !important; }
 

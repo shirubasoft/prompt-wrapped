@@ -20,11 +20,11 @@ describe('Prompt Wrapped URL codec', () => {
   })
 
   it('keeps the report out of the request URL', () => {
-    const location = { origin: 'https://example.test', pathname: '/wrapped/' } as Location
+    const location = { origin: 'https://example.test', pathname: '/wrapped/', search: '?perf=1' } as Location
     const url = wrappedUrl(demoWrapped, location)
 
-    expect(url).toMatch(/^https:\/\/example\.test\/wrapped\/#data=/)
-    expect(url.split('#')[0]).toBe('https://example.test/wrapped/')
+    expect(url).toMatch(/^https:\/\/example\.test\/wrapped\/\?perf=1#data=/)
+    expect(url.split('#')[0]).toBe('https://example.test/wrapped/?perf=1')
   })
 
   it('rejects oversized fragments before decoding', () => {

@@ -14,6 +14,7 @@ import {
 import { demoWrapped } from '../data/demo'
 import { wrappedUrl } from '../lib/codec'
 import { wrappedSchema, type WrappedData } from '../lib/schema'
+import { preloadStory } from '../lib/storyLoader'
 
 type HarnessId = 'codex' | 'claude' | 'opencode' | 'copilot' | 'agy' | 'qwen'
 type OsId = 'unix' | 'windows'
@@ -82,6 +83,12 @@ function HarnessMark({ id }: { id: HarnessId }) {
 }
 
 const installBase = 'https://shiruba.software/prompt-wrapped'
+let demoUrl: string | undefined
+
+function getDemoUrl(): string {
+  demoUrl ??= wrappedUrl(demoWrapped)
+  return demoUrl
+}
 
 function detectOs(): OsId {
   return /Win/i.test(navigator.userAgent) ? 'windows' : 'unix'
@@ -111,6 +118,25 @@ export function Home({ onOpen }: HomeProps) {
     return () => window.clearTimeout(timeout)
   }, [copied])
 
+  useEffect(() => {
+    function prepareStory() {
+      preloadStory()
+      getDemoUrl()
+    }
+
+    const idleWindow = window as unknown as {
+      requestIdleCallback?: Window['requestIdleCallback']
+      cancelIdleCallback?: Window['cancelIdleCallback']
+    }
+    if (idleWindow.requestIdleCallback) {
+      const idle = idleWindow.requestIdleCallback(prepareStory, { timeout: 2_000 })
+      return () => idleWindow.cancelIdleCallback?.(idle)
+    }
+
+    const timer = window.setTimeout(prepareStory, 600)
+    return () => window.clearTimeout(timer)
+  }, [])
+
   const command = commandFor(harness, os)
 
   async function copyCommand() {
@@ -119,7 +145,7 @@ export function Home({ onOpen }: HomeProps) {
   }
 
   function startDemo() {
-    const url = wrappedUrl(demoWrapped)
+    const url = getDemoUrl()
     history.replaceState(null, '', url)
     onOpen(demoWrapped)
   }
@@ -160,7 +186,7 @@ export function Home({ onOpen }: HomeProps) {
             Turn your local coding-agent history into an animated developer recap, a lovingly specific roast,
             and reusable skills that teach the next agent how you work.
           </p>
-          <button className="button button--ghost" type="button" onClick={startDemo}>
+          <button className="button button--ghost" type="button" onPointerEnter={preloadStory} onClick={startDemo}>
             <Play size={17} fill="currentColor" /> Watch the demo
           </button>
         </div>

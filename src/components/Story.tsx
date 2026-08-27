@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, domAnimation, LazyMotion, m, useReducedMotion } from 'motion/react'
 import {
   ArrowLeft,
   ArrowRight,
@@ -15,9 +15,11 @@ import {
 } from 'lucide-react'
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import noiseTexture from '../assets/noise.png'
 import { wrappedUrl } from '../lib/codec'
 import { downloadPoster, sharePoster } from '../lib/poster'
 import { type ThemeId, type WrappedData } from '../lib/schema'
+import { useStoryPerformanceAudit } from '../lib/storyPerformance'
 import { themeName, themes } from '../lib/themes'
 import { Atmosphere } from './Atmosphere'
 
@@ -92,26 +94,26 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
     return (
       <div className="scene scene--intro">
         <div className="intro-index">WRP / {new Date(data.generatedAt).getFullYear()}</div>
-        <motion.div
+        <m.div
           className="intro-shape intro-shape--sun"
           initial={{ scale: 0, rotate: -45 }}
           animate={{ scale: 1, rotate: 10 }}
           transition={{ delay: 0.18, type: 'spring', stiffness: 155, damping: 12 }}
         />
-        <motion.div
+        <m.div
           className="intro-shape intro-shape--bar"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 0.34, duration: 0.64, ease: [0.16, 1, 0.3, 1] }}
         />
         <h1 className="intro-title" aria-label="Your prompt wrapped">
-          <motion.span initial={{ y: '115%', rotate: 3 }} animate={{ y: 0, rotate: -1 }} transition={{ delay: 0.08, type: 'spring', bounce: 0.28, duration: 0.85 }}>YOUR</motion.span>
-          <motion.span initial={{ x: '-112%' }} animate={{ x: 0 }} transition={{ delay: 0.2, duration: 0.82, ease: [0.16, 1, 0.3, 1] }}>PROMPT</motion.span>
-          <motion.span initial={{ y: '-120%', rotate: -4 }} animate={{ y: 0, rotate: 1.5 }} transition={{ delay: 0.3, type: 'spring', bounce: 0.32, duration: 0.95 }}>WRAPPED</motion.span>
+          <m.span initial={{ y: '115%', rotate: 3 }} animate={{ y: 0, rotate: -1 }} transition={{ delay: 0.08, type: 'spring', bounce: 0.28, duration: 0.85 }}>YOUR</m.span>
+          <m.span initial={{ x: '-112%' }} animate={{ x: 0 }} transition={{ delay: 0.2, duration: 0.82, ease: [0.16, 1, 0.3, 1] }}>PROMPT</m.span>
+          <m.span initial={{ y: '-120%', rotate: -4 }} animate={{ y: 0, rotate: 1.5 }} transition={{ delay: 0.3, type: 'spring', bounce: 0.32, duration: 0.95 }}>WRAPPED</m.span>
         </h1>
-        <motion.p className="intro-note" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.78 }}>
+        <m.p className="intro-note" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.78 }}>
           We read the prompts.<br />The agents have notes.
-        </motion.p>
+        </m.p>
         <p className="intro-window">{data.coverage.window}</p>
       </div>
     )
@@ -124,19 +126,19 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
         <SceneLabel number={index}>The complete corpus</SceneLabel>
         <div className="big-number" aria-label={`${data.coverage.totalPrompts.toLocaleString()} prompts`}>
           {digits.map((digit, digitIndex) => (
-            <motion.span
+            <m.span
               key={`${digit}-${digitIndex}`}
               initial={{ y: digitIndex % 2 ? '-110%' : '110%', rotate: digitIndex % 2 ? -8 : 8 }}
               animate={{ y: 0, rotate: 0 }}
               transition={{ delay: digitIndex * 0.075, type: 'spring', stiffness: 125, damping: 13 }}
             >
               {digit}
-            </motion.span>
+            </m.span>
           ))}
         </div>
-        <motion.p className="big-number-caption" initial={{ clipPath: 'inset(0 100% 0 0)' }} animate={{ clipPath: 'inset(0 0% 0 0)' }} transition={{ delay: 0.55, duration: 0.7 }}>
+        <m.p className="big-number-caption" initial={{ clipPath: 'inset(0 100% 0 0)' }} animate={{ clipPath: 'inset(0 0% 0 0)' }} transition={{ delay: 0.55, duration: 0.7 }}>
           prompts walked into a model.<br /><strong>Patterns walked back out.</strong>
-        </motion.p>
+        </m.p>
         <div className="big-number-marquee" aria-hidden="true">
           <span>{data.harness} · {data.coverage.sources.length} sources · local only · </span>
           <span>{data.harness} · {data.coverage.sources.length} sources · local only · </span>
@@ -152,7 +154,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
         <span className="sr-only">{data.developer.title}</span>
         <ol className="ranking-list">
           {rankedScores.slice(0, 5).map((score, scoreIndex) => (
-            <motion.li
+            <m.li
               key={score.key}
               initial={{ x: scoreIndex % 2 ? '105%' : '-105%', skewX: scoreIndex % 2 ? -8 : 8 }}
               animate={{ x: 0, skewX: 0 }}
@@ -162,7 +164,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
               <strong>{score.label}</strong>
               <span className="ranking-score">{score.score.toFixed(1)}</span>
               <i style={{ '--rank-width': `${score.score * 10}%` } as SceneStyle} />
-            </motion.li>
+            </m.li>
           ))}
         </ol>
         <p className="ranking-aside">Ranked by frequency, specificity, and how often an agent had to be asked twice.</p>
@@ -176,17 +178,17 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
       <div className="scene scene--portrait">
         <SceneLabel number={index}>A portrait, drawn from behavior</SceneLabel>
         <div className="portrait-stage">
-          <motion.div className="portrait-word portrait-word--one" initial={{ x: -120 }} animate={{ x: 0 }} transition={{ delay: 0.26, type: 'spring' }}>PROOF</motion.div>
-          <motion.div className="portrait-word portrait-word--two" initial={{ x: 120 }} animate={{ x: 0 }} transition={{ delay: 0.34, type: 'spring' }}>FIRST</motion.div>
+          <m.div className="portrait-word portrait-word--one" initial={{ x: -120 }} animate={{ x: 0 }} transition={{ delay: 0.26, type: 'spring' }}>PROOF</m.div>
+          <m.div className="portrait-word portrait-word--two" initial={{ x: 120 }} animate={{ x: 0 }} transition={{ delay: 0.34, type: 'spring' }}>FIRST</m.div>
           <div className="portrait-rings" aria-hidden="true">
             {Array.from({ length: 5 }, (_, ringIndex) => <i key={ringIndex} style={{ '--ring': ringIndex } as SceneStyle} />)}
           </div>
-          <motion.div className="portrait-avatar depth-layer depth-layer--deep" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12, duration: 0.55 }}>
+          <m.div className="portrait-avatar depth-layer depth-layer--deep" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12, duration: 0.55 }}>
             <span>{initials(data.developer.displayName)}</span>
             <small>{data.developer.displayName}</small>
-          </motion.div>
+          </m.div>
           {fingerprint.map(([label, value], itemIndex) => (
-            <motion.div
+            <m.div
               className={`portrait-tag portrait-tag--${itemIndex + 1} depth-layer`}
               key={label}
               initial={{ opacity: 0 }}
@@ -195,7 +197,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
             >
               <span>{label.replace('Like', '')}</span>
               <p>{value}</p>
-            </motion.div>
+            </m.div>
           ))}
         </div>
         <p className="pointer-note">Move your pointer. The layers keep their distance.</p>
@@ -219,9 +221,9 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
               {tunnelText}
             </span>
           ))}
-          <motion.strong initial={{ scale: 0, rotate: -12 }} animate={{ scale: 1, rotate: 1 }} transition={{ delay: 0.58, type: 'spring', bounce: 0.42 }}>
+          <m.strong initial={{ scale: 0, rotate: -12 }} animate={{ scale: 1, rotate: 1 }} transition={{ delay: 0.58, type: 'spring', bounce: 0.42 }}>
             {data.developer.archetype}
-          </motion.strong>
+          </m.strong>
         </div>
         <p className="tunnel-caption">One archetype. Nine echoes. Zero subtlety.</p>
       </div>
@@ -253,14 +255,18 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
               }
             }
             return (
-              <motion.i
+              <m.span
+                className="data-mark"
                 key={dotIndex}
-                data-source={sourceIndex}
-                style={{ '--dot-index': dotIndex, '--dot-size': `${8 + (dotIndex % 5) * 3}px` } as SceneStyle}
                 initial={{ scale: 0, rotate: -90 }}
                 animate={{ scale: 1, rotate: dotIndex * 11 }}
                 transition={{ delay: (dotIndex % 18) * 0.025, type: 'spring', stiffness: 170, damping: 12 }}
-              />
+              >
+                <i
+                  data-source={sourceIndex}
+                  style={{ '--dot-index': dotIndex, '--dot-size': `${8 + (dotIndex % 5) * 3}px` } as SceneStyle}
+                />
+              </m.span>
             )
           })}
         </div>
@@ -278,17 +284,17 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
       <div className="scene scene--personality">
         <SceneLabel number={index}>Your developer archetype</SceneLabel>
         <div className="personality-composition">
-          <motion.span className="personality-overline" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.58 }}>Apparently, you are</motion.span>
+          <m.span className="personality-overline" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.58 }}>Apparently, you are</m.span>
           <h2>
             {data.developer.archetype.split(' ').map((word, wordIndex) => (
-              <motion.span key={word} initial={{ y: '120%', rotate: wordIndex % 2 ? 6 : -4 }} animate={{ y: 0, rotate: wordIndex % 2 ? -1 : 1 }} transition={{ delay: wordIndex * 0.11, type: 'spring', damping: 13 }}>
+              <m.span key={word} initial={{ y: '120%', rotate: wordIndex % 2 ? 6 : -4 }} animate={{ y: 0, rotate: wordIndex % 2 ? -1 : 1 }} transition={{ delay: wordIndex * 0.11, type: 'spring', damping: 13 }}>
                 {word}
-              </motion.span>
+              </m.span>
             ))}
           </h2>
-          <motion.p className="personality-title" initial={{ rotate: -7, scale: 0 }} animate={{ rotate: -2, scale: 1 }} transition={{ delay: 0.48, type: 'spring', bounce: 0.4 }}>
+          <m.p className="personality-title" initial={{ rotate: -7, scale: 0 }} animate={{ rotate: -2, scale: 1 }} transition={{ delay: 0.48, type: 'spring', bounce: 0.4 }}>
             {data.developer.title}
-          </motion.p>
+          </m.p>
           <p className="personality-summary">{data.developer.summary}</p>
           <div className="accent-ribbon">{data.share.accentWords.join(' · ')}</div>
         </div>
@@ -313,7 +319,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
               const correct = optionIndex === 0
               const revealed = quizChoice !== null
               return (
-                <motion.button
+                <m.button
                   type="button"
                   key={option}
                   className={`${selected ? 'selected' : ''} ${revealed && correct ? 'correct' : ''} ${revealed && selected && !correct ? 'wrong' : ''}`}
@@ -325,16 +331,16 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
                   <span>0{optionIndex + 1}</span>
                   <p>{option}</p>
                   <i>{revealed && correct ? 'THAT ONE' : selected ? 'NICE TRY' : 'PICK'}</i>
-                </motion.button>
+                </m.button>
               )
             })}
           </div>
         </div>
         <AnimatePresence>
           {quizChoice !== null && (
-            <motion.p className="quiz-result" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }}>
+            <m.p className="quiz-result" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }}>
               {quizChoice === 0 ? 'Correct. Completion without execution is how trust issues are born.' : 'Plausible, but the data picked unfinished validation.'}
-            </motion.p>
+            </m.p>
           )}
         </AnimatePresence>
       </div>
@@ -348,7 +354,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
         <h2>The prompt lore,<br />in four acts.</h2>
         <div className="timeline-track">
           {data.moments.slice(0, 4).map((moment, momentIndex) => (
-            <motion.article
+            <m.article
               key={moment.label}
               initial={{ y: momentIndex % 2 ? -45 : 45, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -358,7 +364,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
               <small>{moment.label}</small>
               <strong>{moment.value}</strong>
               <p>{moment.detail}</p>
-            </motion.article>
+            </m.article>
           ))}
         </div>
       </div>
@@ -374,7 +380,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
           <div className="top-item-meter">
             <svg viewBox="0 0 340 340" aria-hidden="true">
               <circle cx="170" cy="170" r="154" />
-              <motion.circle
+              <m.circle
                 className="meter-progress"
                 cx="170"
                 cy="170"
@@ -385,7 +391,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
                 style={{ strokeDasharray: circumference }}
               />
             </svg>
-            <motion.strong initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.35, type: 'spring', bounce: 0.4 }}>{topScore.score.toFixed(1)}</motion.strong>
+            <m.strong initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.35, type: 'spring', bounce: 0.4 }}>{topScore.score.toFixed(1)}</m.strong>
             <span>/ 10</span>
           </div>
           <div className="top-item-copy">
@@ -410,7 +416,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
         </div>
         <div className="field-guide-list">
           {data.skills.map((skill, skillIndex) => (
-            <motion.article
+            <m.article
               key={skill.name}
               initial={{ y: 70, rotate: skillIndex % 2 ? 3 : -3, opacity: 0 }}
               animate={{ y: 0, rotate: 0, opacity: 1 }}
@@ -425,7 +431,7 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
               <button type="button" onClick={() => downloadText(`${skill.name}.SKILL.md`, skill.content)}>
                 <FileDown size={17} /> <span className="sr-only">Save {skill.name}</span>
               </button>
-            </motion.article>
+            </m.article>
           ))}
         </div>
       </div>
@@ -443,10 +449,10 @@ function Scene({ data, index, quizChoice, onQuizChoice }: SceneProps) {
         <p className="final-poster__title">{data.developer.title}</p>
         <div className="final-poster__scores">
           {rankedScores.slice(0, 3).map((score, scoreIndex) => (
-            <motion.div key={score.key} initial={{ scale: 0, rotate: -8 }} animate={{ scale: 1, rotate: scoreIndex - 1 }} transition={{ delay: 0.35 + scoreIndex * 0.09, type: 'spring' }}>
+            <m.div key={score.key} initial={{ scale: 0, rotate: -8 }} animate={{ scale: 1, rotate: scoreIndex - 1 }} transition={{ delay: 0.35 + scoreIndex * 0.09, type: 'spring' }}>
               <strong>{score.score.toFixed(1)}</strong>
               <span>{score.label}</span>
-            </motion.div>
+            </m.div>
           ))}
         </div>
         <p className="final-poster__closing">{data.share.closingLine}</p>
@@ -471,12 +477,42 @@ export function Story({ initialData, onClose }: StoryProps) {
   const [scene, setScene] = useState(0)
   const [direction, setDirection] = useState(1)
   const [playing, setPlaying] = useState(!reduceMotion)
+  const [ready, setReady] = useState(false)
   const [copied, setCopied] = useState(false)
   const [quizChoice, setQuizChoice] = useState<number | null>(null)
+  const [prewarm, setPrewarm] = useState<{ after: number; scene: number } | null>(null)
   const storyRef = useRef<HTMLElement>(null)
   const sceneRef = useRef(0)
   const swipeStart = useRef<number | null>(null)
+  const pointerFrame = useRef<number | null>(null)
+  const pointerPosition = useRef({ x: 0, y: 0 })
   const waitingForQuizAnswer = scene === 7 && quizChoice === null
+
+  useStoryPerformanceAudit(scenes[scene].slug)
+
+  useEffect(() => {
+    let cancelled = false
+    let firstFrame = 0
+    let secondFrame = 0
+    const texture = new Image()
+    texture.src = noiseTexture
+    const textureReady = typeof texture.decode === 'function' ? texture.decode().catch(() => undefined) : Promise.resolve()
+    const fontsReady = document.fonts?.ready ?? Promise.resolve()
+
+    void Promise.all([textureReady, fontsReady]).then(() => {
+      firstFrame = window.requestAnimationFrame(() => {
+        secondFrame = window.requestAnimationFrame(() => {
+          if (!cancelled) setReady(true)
+        })
+      })
+    })
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(firstFrame)
+      window.cancelAnimationFrame(secondFrame)
+    }
+  }, [])
 
   const goTo = useCallback((next: number) => {
     const clamped = Math.min(sceneCount - 1, Math.max(0, next))
@@ -489,10 +525,45 @@ export function Story({ initialData, onClose }: StoryProps) {
   }, [])
 
   useEffect(() => {
-    if (!playing || waitingForQuizAnswer || scene === sceneCount - 1) return
+    if (!ready || !playing || waitingForQuizAnswer || scene === sceneCount - 1) return
     const timer = window.setTimeout(() => goTo(scene + 1), scenes[scene].duration)
     return () => window.clearTimeout(timer)
-  }, [goTo, playing, scene, waitingForQuizAnswer])
+  }, [goTo, playing, ready, scene, waitingForQuizAnswer])
+
+  useEffect(() => {
+    const target = (scene + 1) % sceneCount
+    let idle: number | undefined
+    const timer = window.setTimeout(() => {
+      const warm = () => setPrewarm({ after: scene, scene: target })
+      const idleWindow = window as unknown as {
+        requestIdleCallback?: Window['requestIdleCallback']
+        cancelIdleCallback?: Window['cancelIdleCallback']
+      }
+      if (idleWindow.requestIdleCallback) {
+        idle = idleWindow.requestIdleCallback(warm, { timeout: 1_000 })
+      } else {
+        warm()
+      }
+    }, 1_400)
+
+    return () => {
+      window.clearTimeout(timer)
+      if (idle !== undefined) {
+        const idleWindow = window as unknown as { cancelIdleCallback?: Window['cancelIdleCallback'] }
+        idleWindow.cancelIdleCallback?.(idle)
+      }
+    }
+  }, [data.theme, scene])
+
+  useEffect(() => {
+    if (scene === 3 || !storyRef.current) return
+    storyRef.current.style.setProperty('--pointer-x', '0')
+    storyRef.current.style.setProperty('--pointer-y', '0')
+  }, [scene])
+
+  useEffect(() => () => {
+    if (pointerFrame.current !== null) window.cancelAnimationFrame(pointerFrame.current)
+  }, [])
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -540,11 +611,19 @@ export function Story({ initialData, onClose }: StoryProps) {
   }
 
   function updatePointer(event: React.PointerEvent<HTMLElement>) {
-    if (!storyRef.current) return
-    const x = event.clientX / window.innerWidth - 0.5
-    const y = event.clientY / window.innerHeight - 0.5
-    storyRef.current.style.setProperty('--pointer-x', x.toFixed(3))
-    storyRef.current.style.setProperty('--pointer-y', y.toFixed(3))
+    if (!storyRef.current || sceneRef.current !== 3) return
+    pointerPosition.current = {
+      x: event.clientX / window.innerWidth - 0.5,
+      y: event.clientY / window.innerHeight - 0.5,
+    }
+    if (pointerFrame.current !== null) return
+
+    pointerFrame.current = window.requestAnimationFrame(() => {
+      pointerFrame.current = null
+      if (!storyRef.current) return
+      storyRef.current.style.setProperty('--pointer-x', pointerPosition.current.x.toFixed(3))
+      storyRef.current.style.setProperty('--pointer-y', pointerPosition.current.y.toFixed(3))
+    })
   }
 
   function endSwipe(event: React.PointerEvent<HTMLElement>) {
@@ -568,15 +647,16 @@ export function Story({ initialData, onClose }: StoryProps) {
       }
 
   return (
-    <main
-      ref={storyRef}
-      className={`story theme-${data.theme}`}
-      data-scene={scenes[scene].slug}
-      onPointerMove={updatePointer}
-      onPointerDown={(event) => { swipeStart.current = event.clientX }}
-      onPointerUp={endSwipe}
-      onPointerCancel={() => { swipeStart.current = null }}
-    >
+    <LazyMotion features={domAnimation} strict>
+      <main
+        ref={storyRef}
+        className={`story theme-${data.theme}`}
+        data-scene={scenes[scene].slug}
+        onPointerMove={updatePointer}
+        onPointerDown={(event) => { swipeStart.current = event.clientX }}
+        onPointerUp={endSwipe}
+        onPointerCancel={() => { swipeStart.current = null }}
+      >
       <Atmosphere />
       <header className="story-header">
         <button className="icon-button story-close" type="button" onClick={close} aria-label="Back to home">
@@ -603,8 +683,8 @@ export function Story({ initialData, onClose }: StoryProps) {
             title={item.label}
           >
             <i>
-              {itemIndex === scene && playing && !waitingForQuizAnswer && (
-                <motion.span key={`${scene}-${playing}`} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: item.duration / 1000, ease: 'linear' }} />
+              {ready && itemIndex === scene && playing && !waitingForQuizAnswer && (
+                <m.span key={`${scene}-${playing}`} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: item.duration / 1000, ease: 'linear' }} />
               )}
             </i>
           </button>
@@ -613,19 +693,31 @@ export function Story({ initialData, onClose }: StoryProps) {
 
       <section className="scene-shell" aria-live="polite">
         <AnimatePresence mode="sync" initial={false} custom={direction}>
-          <motion.div
-            className={`scene-motion scene-motion--${scenes[scene].slug}`}
-            key={`${scene}-${data.theme}`}
-            custom={direction}
-            variants={transitionVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: reduceMotion ? 0.12 : 0.58, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <Scene data={data} index={scene} quizChoice={quizChoice} onQuizChoice={setQuizChoice} />
-          </motion.div>
+          {ready && (
+            <m.div
+              className={`scene-motion scene-motion--${scenes[scene].slug}`}
+              key={`${scene}-${data.theme}`}
+              custom={direction}
+              variants={transitionVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: reduceMotion ? 0.12 : 0.58, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Scene data={data} index={scene} quizChoice={quizChoice} onQuizChoice={setQuizChoice} />
+            </m.div>
+          )}
         </AnimatePresence>
+        {ready && prewarm?.after === scene && prewarm.scene !== scene && (
+          <div
+            className={`scene-prewarm scene-motion scene-motion--${scenes[prewarm.scene].slug}`}
+            key={`prewarm-${prewarm.scene}-${data.theme}`}
+            aria-hidden="true"
+            inert
+          >
+            <Scene data={data} index={prewarm.scene} quizChoice={quizChoice} onQuizChoice={() => undefined} />
+          </div>
+        )}
       </section>
 
       <footer className="story-controls">
@@ -648,6 +740,7 @@ export function Story({ initialData, onClose }: StoryProps) {
           {copied ? 'Copied' : 'Copy private link'}
         </button>
       </footer>
-    </main>
+      </main>
+    </LazyMotion>
   )
 }
