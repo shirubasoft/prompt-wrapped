@@ -45,7 +45,7 @@ REPORT_SCHEMA: dict[str, Any] = {
         "scores", "fingerprint", "strengths", "friction", "moments", "skills", "share",
     ],
     "properties": {
-        "version": {"const": 1},
+        "version": {"type": "integer", "const": 1},
         "generatedAt": string_schema(80),
         "harness": string_schema(80),
         "theme": {"type": "string", "enum": sorted(THEMES)},

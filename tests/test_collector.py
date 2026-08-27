@@ -9,10 +9,21 @@ from unittest.mock import patch
 
 
 COLLECTOR_PATH = Path(__file__).parents[1] / "public" / "collector.py"
+SCHEMA_PATH = Path(__file__).parents[1] / "public" / "prompt-wrapped.schema.json"
 SPEC = importlib.util.spec_from_file_location("prompt_wrapped_collector", COLLECTOR_PATH)
 collector = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(collector)
+
+
+def property_schemas(schema, path="$"):
+    for name, property_schema in schema.get("properties", {}).items():
+        property_path = f"{path}.{name}"
+        yield property_path, property_schema
+        yield from property_schemas(property_schema, property_path)
+    items = schema.get("items")
+    if isinstance(items, dict):
+        yield from property_schemas(items, f"{path}[]")
 
 
 def report():
@@ -72,6 +83,13 @@ class CollectorTests(unittest.TestCase):
         prompt = " ".join(collector.ANALYSIS_PROMPT.split())
         self.assertIn("Keep rating labels at 28 characters or fewer", prompt)
         self.assertIn("each fingerprint metaphor at 100 characters or fewer", prompt)
+
+    def test_report_schema_properties_declare_types(self):
+        public_schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+        for source, schema in (("collector", collector.REPORT_SCHEMA), ("public", public_schema)):
+            for path, property_schema in property_schemas(schema):
+                with self.subTest(source=source, path=path):
+                    self.assertIn("type", property_schema)
 
     def test_parses_structured_harness_wrapper(self):
         wrapped = json.dumps({"type": "result", "structured_output": report()})
