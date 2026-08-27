@@ -361,24 +361,28 @@
 
 .harness-option__mark {
   display: grid;
-  width: 42px;
-  height: 42px;
-  padding: 5px;
-  overflow: hidden;
-  background: #fff9e0;
-  border: 1px solid rgba(29, 23, 64, 0.34);
+  width: 38px;
+  height: 38px;
+  color: var(--harness-accent);
   place-items: center;
 }
 
 .harness-option__mark svg,
-.harness-option__mark img {
+.harness-option__agy-mark {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
 }
 
-.harness-option[data-harness='agy'] .harness-option__mark { padding: 0; }
+.harness-option__mark svg { overflow: visible; }
+
+.harness-option__mark svg path { fill: currentColor; }
+
+.harness-option__agy-mark {
+  background: currentColor;
+  -webkit-mask: url('https://antigravity.google/assets/image/brand/antigravity-icon__one-color.png') center / contain no-repeat;
+  mask: url('https://antigravity.google/assets/image/brand/antigravity-icon__one-color.png') center / contain no-repeat;
+}
 
 .harness-option__name {
   overflow: hidden;
@@ -400,6 +404,8 @@
   box-shadow: 4px 4px 0 var(--harness-accent);
   transform: translate(-2px, -2px);
 }
+
+.harness-option input:checked + .harness-option__face .harness-option__mark { color: #e6ff4e; }
 
 .harness-option input:focus-visible + .harness-option__face {
   outline: 3px solid #ff543b;

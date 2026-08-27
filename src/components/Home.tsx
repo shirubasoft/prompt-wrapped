@@ -71,10 +71,7 @@ function HarnessMark({ id }: { id: HarnessId }) {
   }
   if (id === 'agy') {
     return (
-      <img
-        alt=""
-        src="https://antigravity.google/assets/image/brand/antigravity-icon__full-color.png"
-      />
+      <span className="harness-option__agy-mark" aria-hidden="true" />
     )
   }
   return (

@@ -31,7 +31,7 @@ describe('Home', () => {
     for (const name of ['Codex', 'Claude Code', 'OpenCode', 'Copilot', 'Agy', 'Qwen Code']) {
       const radio = screen.getByRole('radio', { name: new RegExp(name) })
       expect(radio).toBeInTheDocument()
-      expect(radio.closest('label')?.querySelector('.harness-option__mark > svg, .harness-option__mark > img')).toBeTruthy()
+      expect(radio.closest('label')?.querySelector('.harness-option__mark > svg, .harness-option__agy-mark')).toBeTruthy()
     }
     expect(screen.queryByRole('radio', { name: /Gemini CLI/ })).not.toBeInTheDocument()
 
@@ -40,10 +40,7 @@ describe('Home', () => {
     const agy = screen.getByRole('radio', { name: /Agy/ }).closest('label')
     expect(codex?.querySelector('svg')).toHaveAttribute('viewBox', '0 0 28 28')
     expect(copilot?.querySelector('svg')).toHaveAttribute('viewBox', '0 0 16 16')
-    expect(agy?.querySelector('img')).toHaveAttribute(
-      'src',
-      'https://antigravity.google/assets/image/brand/antigravity-icon__full-color.png',
-    )
+    expect(agy?.querySelector('.harness-option__agy-mark')).toBeInTheDocument()
   })
 
   it('opens the reference story without a model run', async () => {
