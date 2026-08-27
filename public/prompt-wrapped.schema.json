@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prompt Wrapped report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "harness", "theme", "developer", "coverage", "scores", "fingerprint", "strengths", "friction", "moments", "skills", "share"],
+  "properties": {
+    "version": { "const": 1 },
+    "generatedAt": { "type": "string" },
+    "harness": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "theme": { "enum": ["neon-orbit", "terminal-signal", "paper-cut", "cosmic-lava", "blueprint", "pixel-arcade"] },
+    "developer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["displayName", "archetype", "title", "tagline", "summary"],
+      "properties": {
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "archetype": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "tagline": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 700 }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sources", "totalPrompts", "window", "limitations"],
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "prompts", "sessions", "status"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+              "prompts": { "type": ["integer", "null"], "minimum": 0 },
+              "sessions": { "type": ["integer", "null"], "minimum": 0 },
+              "status": { "enum": ["analyzed", "partial", "unavailable"] }
+            }
+          }
+        },
+        "totalPrompts": { "type": "integer", "minimum": 0 },
+        "window": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "limitations": { "type": "array", "maxItems": 8, "items": { "type": "string", "minLength": 1, "maxLength": 240 } }
+      }
+    },
+    "scores": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "label", "score", "confidence", "reason"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1, "maxLength": 40 },
+          "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "score": { "type": "number", "minimum": 1, "maximum": 10 },
+          "confidence": { "enum": ["high", "medium", "low"] },
+          "reason": { "type": "string", "minLength": 1, "maxLength": 280 }
+        }
+      }
+    },
+    "fingerprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shipsLike", "debugsLike", "testsLike", "communicatesLike"],
+      "properties": {
+        "shipsLike": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "debugsLike": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "testsLike": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "communicatesLike": { "type": "string", "minLength": 1, "maxLength": 240 }
+      }
+    },
+    "strengths": { "type": "array", "minItems": 3, "maxItems": 6, "items": { "type": "string", "minLength": 1, "maxLength": 180 } },
+    "friction": { "type": "array", "minItems": 3, "maxItems": 6, "items": { "type": "string", "minLength": 1, "maxLength": 180 } },
+    "moments": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "value", "detail"],
+        "properties": {
+          "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "value": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "detail": { "type": "string", "minLength": 1, "maxLength": 220 }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "description", "trigger", "content"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z0-9-]+$", "maxLength": 63 },
+          "description": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "trigger": { "type": "string", "minLength": 1, "maxLength": 220 },
+          "content": { "type": "string", "minLength": 20, "maxLength": 12000 }
+        }
+      }
+    },
+    "share": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["closingLine", "accentWords"],
+      "properties": {
+        "closingLine": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "accentWords": { "type": "array", "minItems": 2, "maxItems": 5, "items": { "type": "string", "minLength": 1, "maxLength": 32 } }
+      }
+    }
+  }
+}
