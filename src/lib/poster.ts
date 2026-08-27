@@ -9,25 +9,31 @@ const palettes = {
   'pixel-arcade': ['#160c2a', '#f9f871', '#ff67d4', '#5ef5ff'],
 } as const
 
-function roundedRect(
+function fitWrappedText(
   context: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number,
+  text: string,
+  maxWidth: number,
+  maxLines: number,
+  startSize = 146,
+  minSize = 58,
 ) {
-  context.beginPath()
-  context.roundRect(x, y, width, height, radius)
-  context.fill()
-}
-
-function fitText(context: CanvasRenderingContext2D, text: string, maxWidth: number) {
-  let size = 106
-  do {
+  for (let size = startSize; size >= minSize; size -= 2) {
     context.font = `900 ${size}px Arial, sans-serif`
-    size -= 2
-  } while (context.measureText(text).width > maxWidth && size > 52)
+    const lines: string[] = []
+    let line = ''
+    for (const word of text.split(/\s+/)) {
+      const candidate = `${line} ${word}`.trim()
+      if (line && context.measureText(candidate).width > maxWidth) {
+        lines.push(line)
+        line = word
+      } else {
+        line = candidate
+      }
+    }
+    if (line) lines.push(line)
+    if (lines.length <= maxLines) return { lines, size }
+  }
+  return { lines: [text], size: minSize }
 }
 
 function wrapText(
@@ -65,76 +71,79 @@ export async function createPoster(data: WrappedData): Promise<Blob> {
   if (!context) throw new Error('Canvas is not supported in this browser.')
 
   const [background, foreground, accent, accentTwo] = palettes[data.theme]
+  const topScores = [...data.scores].sort((left, right) => right.score - left.score).slice(0, 3)
+  const year = new Date(data.generatedAt).getFullYear()
+
+  context.fillStyle = accentTwo
+  context.fillRect(0, 0, canvas.width, canvas.height)
+
   context.fillStyle = background
-  context.fillRect(0, 0, canvas.width, canvas.height)
+  context.fillRect(48, 48, 984, 1254)
+  context.fillStyle = accent
+  context.fillRect(68, 68, 944, 1214)
 
-  const gradient = context.createRadialGradient(930, 150, 20, 930, 150, 720)
-  gradient.addColorStop(0, `${accent}cc`)
-  gradient.addColorStop(0.5, `${accentTwo}44`)
-  gradient.addColorStop(1, `${background}00`)
-  context.fillStyle = gradient
-  context.fillRect(0, 0, canvas.width, canvas.height)
+  context.beginPath()
+  context.arc(955, 42, 270, 0, Math.PI * 2)
+  context.fillStyle = accentTwo
+  context.fill()
+  context.lineWidth = 54
+  context.strokeStyle = foreground
+  context.stroke()
 
-  context.strokeStyle = `${foreground}22`
-  context.lineWidth = 2
-  for (let x = -200; x < 1280; x += 64) {
-    context.beginPath()
-    context.moveTo(x, 0)
-    context.lineTo(x + 520, 1350)
-    context.stroke()
-  }
-
+  context.fillStyle = background
+  context.fillRect(68, 68, 204, 112)
   context.fillStyle = foreground
-  context.font = '700 28px ui-monospace, monospace'
-  context.letterSpacing = '5px'
-  context.fillText('PROMPT WRAPPED / 2026', 72, 90)
+  context.font = '900 24px ui-monospace, monospace'
+  context.letterSpacing = '4px'
+  context.fillText('PROMPT', 88, 112)
+  context.fillText('WRAPPED', 88, 146)
+
+  context.textAlign = 'right'
+  context.fillStyle = background
+  context.font = '900 74px Arial, sans-serif'
+  context.letterSpacing = '-4px'
+  context.fillText(String(year), 980, 156)
+  context.textAlign = 'left'
   context.letterSpacing = '0px'
 
-  context.fillStyle = accent
-  context.font = '900 34px Arial, sans-serif'
-  context.fillText(data.developer.archetype.toUpperCase(), 72, 190)
+  context.fillStyle = background
+  context.font = '900 25px ui-monospace, monospace'
+  context.fillText(`${data.developer.displayName.toUpperCase()}'S DEVELOPER ARCHETYPE`, 88, 252)
 
-  context.fillStyle = foreground
-  fitText(context, data.developer.title, 930)
-  const titleWords = data.developer.title.split(' ')
-  const lines: string[] = []
-  let line = ''
-  for (const word of titleWords) {
-    const candidate = `${line} ${word}`.trim()
-    if (context.measureText(candidate).width > 900 && line) {
-      lines.push(line)
-      line = word
-    } else {
-      line = candidate
-    }
-  }
-  lines.push(line)
-  lines.slice(0, 4).forEach((titleLine, index) => context.fillText(titleLine, 72, 310 + index * 112))
-
-  const cardY = 760
-  const topScores = [...data.scores].sort((left, right) => right.score - left.score).slice(0, 3)
-  topScores.forEach((score, index) => {
-    const x = 72 + index * 316
-    context.fillStyle = `${foreground}12`
-    roundedRect(context, x, cardY, 286, 230, 28)
-    context.fillStyle = index === 1 ? accentTwo : accent
-    context.font = '900 72px Arial, sans-serif'
-    context.fillText(score.score.toFixed(1), x + 24, cardY + 92)
-    context.fillStyle = foreground
-    context.font = '700 23px Arial, sans-serif'
-    wrapText(context, score.label, x + 24, cardY + 145, 238, 31, 2)
+  const archetypeLayout = fitWrappedText(context, data.developer.archetype.toUpperCase(), 860, 3)
+  context.fillStyle = background
+  archetypeLayout.lines.forEach((archetypeLine, index) => {
+    context.fillText(archetypeLine, 88, 382 + index * archetypeLayout.size * 0.83)
   })
 
-  context.fillStyle = foreground
-  context.font = '600 31px Arial, sans-serif'
-  wrapText(context, data.share.closingLine, 72, 1100, 920, 42, 2)
+  context.fillStyle = background
+  context.font = '800 27px Arial, sans-serif'
+  wrapText(context, data.developer.title, 88, 720, 770, 35, 2)
 
-  context.fillStyle = accent
-  context.font = '800 26px ui-monospace, monospace'
-  context.fillText('prompt-wrapped', 72, 1275)
-  context.fillStyle = foreground
+  const scoreY = 842
+  topScores.forEach((score, index) => {
+    const x = 88 + index * 300
+    context.fillStyle = index === 1 ? accentTwo : background
+    context.fillRect(x, scoreY, 282, 208)
+    context.fillStyle = index === 1 ? background : foreground
+    context.font = '900 78px Arial, sans-serif'
+    context.fillText(score.score.toFixed(1), x + 18, scoreY + 84)
+    context.font = '800 20px Arial, sans-serif'
+    wrapText(context, score.label.toUpperCase(), x + 18, scoreY + 137, 238, 26, 2)
+  })
+
+  context.fillStyle = background
+  context.font = '800 27px Arial, sans-serif'
+  wrapText(context, data.share.closingLine, 88, 1125, 820, 36, 2)
+
+  context.fillStyle = background
+  context.font = '900 20px ui-monospace, monospace'
+  context.letterSpacing = '2px'
+  context.fillText('PROMPT-WRAPPED', 88, 1237)
   context.textAlign = 'right'
-  context.fillText(`made with ${data.harness}`, 1008, 1275)
+  context.fillText(`MADE WITH ${data.harness.toUpperCase()}`, 980, 1237)
+  context.textAlign = 'left'
+  context.letterSpacing = '0px'
 
   return await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Poster export failed.'))), 'image/png')

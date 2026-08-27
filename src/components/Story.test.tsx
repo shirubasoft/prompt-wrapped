@@ -24,4 +24,15 @@ describe('Story', () => {
     await user.selectOptions(screen.getByLabelText('Animation theme'), 'blueprint')
     expect(container.firstChild).toHaveClass('theme-blueprint')
   })
+
+  it('offers the complete story sequence and reveals quiz feedback', async () => {
+    const user = userEvent.setup()
+    render(<Story initialData={demoWrapped} onClose={vi.fn()} />)
+
+    expect(screen.getAllByRole('button', { name: /go to .*scene/i })).toHaveLength(12)
+    await user.click(screen.getByRole('button', { name: /go to friction quiz/i }))
+    await user.click(screen.getByRole('button', { name: /an agent says "done"/i }))
+
+    expect(await screen.findByText(/completion without execution is how trust issues are born/i)).toBeInTheDocument()
+  })
 })

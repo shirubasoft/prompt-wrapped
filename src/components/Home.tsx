@@ -98,8 +98,8 @@ export function Home({ onOpen }: HomeProps) {
         <div className="hero-copy">
           <p className="eyebrow"><Sparkles size={15} /> Your year in prompts</p>
           <h1>
-            The agents kept
-            <span>receipts.</span>
+            <span>The agents</span>
+            <span>kept receipts.</span>
           </h1>
           <p className="hero-lede">
             Turn your local coding-agent history into an animated developer recap, a lovingly specific roast,
@@ -108,6 +108,19 @@ export function Home({ onOpen }: HomeProps) {
           <button className="button button--ghost" type="button" onClick={startDemo}>
             <Play size={17} fill="currentColor" /> Watch the demo
           </button>
+        </div>
+
+        <div className="hero-art" aria-hidden="true">
+          <div className="hero-art__orbit">
+            {Array.from({ length: 6 }, (_, index) => <i key={index} />)}
+          </div>
+          <div className="hero-art__number">
+            <strong>{demoWrapped.coverage.totalPrompts.toLocaleString()}</strong>
+            <span>prompts, one peculiar developer</span>
+          </div>
+          <div className="hero-art__type">
+            <span>PROOF</span><span>PROOF</span><span>PROOF</span><span>PROOF</span>
+          </div>
         </div>
 
         <div className="runner-card" id="make-yours">
