@@ -476,6 +476,7 @@ export function Story({ initialData, onClose }: StoryProps) {
   const storyRef = useRef<HTMLElement>(null)
   const sceneRef = useRef(0)
   const swipeStart = useRef<number | null>(null)
+  const waitingForQuizAnswer = scene === 7 && quizChoice === null
 
   const goTo = useCallback((next: number) => {
     const clamped = Math.min(sceneCount - 1, Math.max(0, next))
@@ -488,10 +489,10 @@ export function Story({ initialData, onClose }: StoryProps) {
   }, [])
 
   useEffect(() => {
-    if (!playing || scene === sceneCount - 1) return
+    if (!playing || waitingForQuizAnswer || scene === sceneCount - 1) return
     const timer = window.setTimeout(() => goTo(scene + 1), scenes[scene].duration)
     return () => window.clearTimeout(timer)
-  }, [goTo, playing, scene])
+  }, [goTo, playing, scene, waitingForQuizAnswer])
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -602,7 +603,7 @@ export function Story({ initialData, onClose }: StoryProps) {
             title={item.label}
           >
             <i>
-              {itemIndex === scene && playing && (
+              {itemIndex === scene && playing && !waitingForQuizAnswer && (
                 <motion.span key={`${scene}-${playing}`} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: item.duration / 1000, ease: 'linear' }} />
               )}
             </i>

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -34,5 +34,20 @@ describe('Story', () => {
     await user.click(screen.getByRole('button', { name: /an agent says "done"/i }))
 
     expect(await screen.findByText(/completion without execution is how trust issues are born/i)).toBeInTheDocument()
+  })
+
+  it('does not autoplay past an unanswered quiz', () => {
+    vi.useFakeTimers()
+    try {
+      const { container } = render(<Story initialData={demoWrapped} onClose={vi.fn()} />)
+
+      fireEvent.click(screen.getByRole('button', { name: /go to friction quiz/i }))
+      act(() => vi.advanceTimersByTime(20_000))
+
+      expect(container.firstChild).toHaveAttribute('data-scene', 'quiz')
+      expect(screen.getByText(/which move got the loudest internal sigh/i)).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
