@@ -4,7 +4,7 @@ Your coding agents kept receipts.
 
 Prompt Wrapped turns local coding-assistant conversations into an animated developer recap and a small bundle of reusable working-style skills. The analysis runs through an agent already installed on the developer's machine. The static site decodes the report from the URL fragment and never receives the JSON.
 
-[Open the live site](https://shirubasoft.github.io/prompt-wrapped/) or run it locally:
+[Open the live site](https://shiruba.software/prompt-wrapped/) or run it locally:
 
 ```sh
 npm install

@@ -3,7 +3,7 @@ set -eu
 
 HARNESS="${1:-codex}"
 [ "$#" -eq 0 ] || shift
-BASE_URL="${PROMPT_WRAPPED_ASSET_URL:-https://shirubasoft.github.io/prompt-wrapped}"
+BASE_URL="${PROMPT_WRAPPED_ASSET_URL:-https://shiruba.software/prompt-wrapped}"
 TASK_DIR="$(mktemp -d)"
 COLLECTOR="$TASK_DIR/collector.py"
 

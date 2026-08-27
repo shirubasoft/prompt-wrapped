@@ -26,7 +26,7 @@ const harnesses: Array<{ id: HarnessId; name: string; detail: string }> = [
   { id: 'opencode', name: 'OpenCode', detail: 'Open source harness' },
 ]
 
-const installBase = 'https://shirubasoft.github.io/prompt-wrapped'
+const installBase = 'https://shiruba.software/prompt-wrapped'
 
 function detectOs(): OsId {
   return /Win/i.test(navigator.userAgent) ? 'windows' : 'unix'

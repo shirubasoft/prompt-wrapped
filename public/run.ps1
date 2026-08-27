@@ -1,7 +1,7 @@
 param(
   [ValidateSet('codex', 'claude', 'gemini', 'opencode')]
   [string]$Harness = 'codex',
-  [string]$BaseUrl = 'https://shirubasoft.github.io/prompt-wrapped'
+  [string]$BaseUrl = 'https://shiruba.software/prompt-wrapped'
 )
 
 $ErrorActionPreference = 'Stop'

@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-PUBLIC_URL = "https://shirubasoft.github.io/prompt-wrapped/"
+PUBLIC_URL = "https://shiruba.software/prompt-wrapped/"
 THEMES = {
     "neon-orbit",
     "terminal-signal",
