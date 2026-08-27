@@ -9,4 +9,4 @@ Verified on 2026-08-27. The selector uses product marks from first-party pages o
 - **Antigravity CLI (`agy`):** full-color icon from Google Antigravity’s [official press assets](https://antigravity.google/press).
 - **Qwen Code:** square mark from Qwen Code’s [first-party repository](https://github.com/QwenLM/qwen-code/blob/main/packages/desktop-shell/bootstrap/qwen-code-logo.svg).
 
-The vector geometry is embedded locally for Codex, Claude Code, OpenCode, GitHub Copilot CLI, and Qwen Code. Antigravity uses the transparent one-color PNG from the first-party press kit as a CSS mask. This lets every official mark inherit its harness accent and switch color with the selected state without adding a logo box.
+The vector geometry is embedded locally for Codex, Claude Code, OpenCode, GitHub Copilot CLI, and Qwen Code. Antigravity uses the transparent one-color PNG from the first-party press kit, embedded locally as a CSS mask. This lets every official mark inherit its harness accent and switch color with the selected state without adding a logo box.
