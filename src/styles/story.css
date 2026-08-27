@@ -1545,7 +1545,14 @@
   .theme-select select { width: 34px; min-width: 34px; padding: 0; color: transparent; }
   .scene-shell { padding: 0 6px; }
   .scene { padding: 18px 16px; }
-  .scene-label p { max-width: 50vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scene-label { width: auto; max-width: 100%; }
+  .scene-label p {
+    max-width: calc(100vw - 100px);
+    font-size: clamp(0.48rem, 1.9vw, 0.58rem);
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    white-space: normal;
+  }
 
   .scene--intro { padding: 18px; }
   .intro-title { align-self: center; font-size: clamp(4.6rem, 24vw, 8rem); line-height: 0.72; }
@@ -1559,14 +1566,26 @@
   .big-number-caption { font-size: 1.25rem; }
 
   .ranking-list { align-self: center; transform: rotate(-1deg); }
-  .ranking-list li { grid-template-columns: 30px 1fr auto; gap: 8px; min-height: clamp(50px, 8.5vh, 68px); padding: 0 8px; }
-  .ranking-list strong { font-size: clamp(1rem, 5.3vw, 1.6rem); }
+  .ranking-list li { grid-template-columns: 30px 1fr auto; gap: 8px; min-height: clamp(54px, 9vh, 72px); padding: 5px 8px; }
+  .ranking-list strong {
+    overflow: visible;
+    font-size: clamp(0.86rem, 4.2vw, 1.25rem);
+    line-height: 0.9;
+    text-overflow: clip;
+    white-space: normal;
+  }
   .ranking-aside { max-width: 42ch; font-size: 0.53rem; }
 
   .portrait-stage { margin-top: 10px; }
   .portrait-avatar { width: min(54vw, 270px); }
-  .portrait-tag { width: 132px; padding: 8px; }
-  .portrait-tag p { font-size: 0.57rem; -webkit-line-clamp: 2; }
+  .portrait-tag { width: min(44vw, 172px); padding: 9px 10px; }
+  .portrait-tag span { font-size: 0.5rem; letter-spacing: 0.09em; }
+  .portrait-tag p {
+    margin-top: 6px;
+    font-size: clamp(0.5rem, 2vw, 0.57rem);
+    line-height: 1.28;
+    -webkit-line-clamp: 4;
+  }
   .portrait-tag--1 { top: 7%; left: 0; }
   .portrait-tag--2 { top: 9%; right: 0; }
   .portrait-tag--3 { bottom: 7%; left: 0; }
@@ -1635,6 +1654,25 @@
   .scene-meta span,
   .theme-name,
   .copy-link { display: none; }
+}
+
+@media (max-width: 680px) and (max-height: 720px) {
+  .scene--field-guide { gap: 6px; }
+  .field-guide-heading h2 {
+    max-width: 11ch;
+    font-size: clamp(2.1rem, 10vw, 3rem);
+  }
+  .field-guide-heading p { font-size: 0.43rem; line-height: 1.25; }
+  .field-guide-list article {
+    grid-template-columns: 26px 1fr 30px;
+    gap: 7px;
+    min-height: 88px;
+    padding: 7px 8px;
+  }
+  .field-guide-list strong { font-size: 0.66rem; }
+  .field-guide-list p { margin: 4px 0; font-size: 0.53rem; line-height: 1.18; }
+  .field-guide-list small { font-size: 0.45rem; line-height: 1.15; }
+  .field-guide-list button { width: 30px; height: 30px; }
 }
 
 @media (max-height: 650px) and (min-width: 681px) {

@@ -246,6 +246,10 @@ RATINGS AND THE WRAPPED STORY
   sustained exceptional evidence, and ten should be almost unreachable. Do not produce one overall score.
 - Every rating needs a concise evidence-based reason and a confidence label. Do not claim unaided code
   authorship, production ownership, human-team influence, business results, or seniority from agent chats.
+- Write for a phone-sized story, not a report page. Keep rating labels at 28 characters or fewer,
+  archetypes at 32 characters or fewer, ceremonial titles at 72 characters or fewer, and each fingerprint
+  metaphor at 100 characters or fewer. Prefer short concrete phrases over clauses. Put nuance in rating
+  reasons or the summary instead of squeezing it into display copy.
 - Give a funny archetype and quirky ceremonial title. Make the joke precise and affectionate, based on
   repeated observable behavior. It must not pretend to be a real job-level assessment.
 - Choose exactly one animation theme. neon-orbit fits systems thinking and cross-cutting ownership;

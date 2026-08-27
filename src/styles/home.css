@@ -589,8 +589,13 @@
   .site-nav { min-height: 66px; }
   .hero-section { display: block; min-height: auto; padding: 42px 0 60px; }
   .hero-copy { position: relative; }
-  .hero-copy h1 { font-size: clamp(3.9rem, 18.5vw, 6.4rem); }
-  .hero-copy h1 span:last-child { transform: translateX(0.07em); }
+  .hero-copy h1 { font-size: clamp(3.7rem, 17vw, 6rem); }
+  .hero-copy h1 span:last-child {
+    width: 100%;
+    font-size: clamp(2.75rem, 12.4vw, 4.4rem);
+    white-space: nowrap;
+    transform: translateX(0.03em);
+  }
   .hero-lede { max-width: 90%; margin: 26px 0 22px; font-size: 0.9rem; }
 
   .hero-art {
@@ -630,6 +635,10 @@
   .os-switch { width: 100%; }
   .os-switch button { flex: 1; }
   .command-box { min-height: 76px; }
+}
+
+@media (max-width: 360px) {
+  .hero-copy h1 { font-size: clamp(3.1rem, 15.5vw, 3.7rem); }
 }
 
 @media (prefers-reduced-motion: reduce) {

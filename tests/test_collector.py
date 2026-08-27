@@ -61,6 +61,11 @@ def report():
 
 
 class CollectorTests(unittest.TestCase):
+    def test_prompt_constrains_phone_sized_display_copy(self):
+        prompt = " ".join(collector.ANALYSIS_PROMPT.split())
+        self.assertIn("Keep rating labels at 28 characters or fewer", prompt)
+        self.assertIn("each fingerprint metaphor at 100 characters or fewer", prompt)
+
     def test_parses_structured_harness_wrapper(self):
         wrapped = json.dumps({"type": "result", "structured_output": report()})
         self.assertEqual(collector.parse_report(wrapped)["developer"]["displayName"], "Dev")
