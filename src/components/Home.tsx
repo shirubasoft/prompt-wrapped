@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   Check,
-  ChevronDown,
   Clipboard,
   Code2,
   FileJson,
@@ -16,15 +15,62 @@ import { demoWrapped } from '../data/demo'
 import { wrappedUrl } from '../lib/codec'
 import { wrappedSchema, type WrappedData } from '../lib/schema'
 
-type HarnessId = 'codex' | 'claude' | 'gemini' | 'opencode'
+type HarnessId = 'codex' | 'claude' | 'opencode' | 'copilot' | 'agy' | 'qwen'
 type OsId = 'unix' | 'windows'
 
 const harnesses: Array<{ id: HarnessId; name: string; detail: string }> = [
   { id: 'codex', name: 'Codex', detail: 'OpenAI coding agent' },
-  { id: 'claude', name: 'Claude Code', detail: 'Anthropic CLI' },
-  { id: 'gemini', name: 'Gemini CLI', detail: 'Google agent' },
-  { id: 'opencode', name: 'OpenCode', detail: 'Open source harness' },
+  { id: 'claude', name: 'Claude Code', detail: 'Anthropic coding agent' },
+  { id: 'opencode', name: 'OpenCode', detail: 'Open source coding agent' },
+  { id: 'copilot', name: 'Copilot', detail: 'GitHub Copilot CLI' },
+  { id: 'agy', name: 'Agy', detail: 'Google Antigravity CLI' },
+  { id: 'qwen', name: 'Qwen Code', detail: 'Qwen coding agent' },
 ]
+
+function HarnessMark({ id }: { id: HarnessId }) {
+  if (id === 'codex') {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 6 34 12v12l-10 6-10-6V12L24 6Zm10 6 8 5v12l-10 6-8-5m-10-6-8 5 10 6 8-5m0-24v12l10 6" />
+      </svg>
+    )
+  }
+  if (id === 'claude') {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 5v38M5 24h38M10.6 10.6l26.8 26.8M37.4 10.6 10.6 37.4M16.7 6.8l14.6 34.4M41.2 16.7 6.8 31.3M31.3 6.8 16.7 41.2M41.2 31.3 6.8 16.7" />
+      </svg>
+    )
+  }
+  if (id === 'opencode') {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="m17 12-10 12 10 12M31 12l10 12-10 12M27 8l-6 32" />
+      </svg>
+    )
+  }
+  if (id === 'copilot') {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M21 17a8 8 0 1 0 0 14v-7h-6M27 16v16M37 16v16M27 24h10" />
+      </svg>
+    )
+  }
+  if (id === 'agy') {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="m14 38 10-30 10 30M18 27h12" />
+        <ellipse cx="24" cy="24" rx="21" ry="9" transform="rotate(-20 24 24)" />
+        <circle cx="42" cy="17" r="2.5" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 141.38 140" aria-hidden="true">
+      <path d="m140.93 85-16.35-28.33-1.93-3.34 8.66-15a3.323 3.323 0 0 0 0-3.34l-9.62-16.67c-.3-.51-.72-.93-1.22-1.22s-1.07-.45-1.67-.45H82.23l-8.66-15a3.33 3.33 0 0 0-2.89-1.67H51.43c-.59 0-1.17.16-1.66.45-.5.29-.92.71-1.22 1.22L32.19 29.98l-1.92 3.33H12.96c-.59 0-1.17.16-1.66.45-.5.29-.93.71-1.22 1.22L.45 51.66a3.323 3.323 0 0 0 0 3.34l18.28 31.67-8.66 15a3.32 3.32 0 0 0 0 3.34l9.62 16.67c.3.51.72.93 1.22 1.22s1.07.45 1.67.45h36.56l8.66 15a3.35 3.35 0 0 0 2.89 1.67h19.25a3.34 3.34 0 0 0 2.89-1.67l18.28-31.67h17.32c.6 0 1.17-.16 1.67-.45s.92-.71 1.22-1.22l9.62-16.67a3.323 3.323 0 0 0 0-3.34ZM51.44 3.33 61.07 20l-9.63 16.66h76.98l-9.62 16.66H45.67l-11.54-20zM57.21 120H22.58l9.63-16.67h19.25l-38.5-66.67h19.25l9.62 16.67L68.78 100l-11.55 20Zm61.59-33.34-9.62-16.67-38.49 66.67-9.63-16.67 9.63-16.66 26.94-46.67h23.1l17.32 30z" />
+    </svg>
+  )
+}
 
 const installBase = 'https://shiruba.software/prompt-wrapped'
 
@@ -129,15 +175,27 @@ export function Home({ onOpen }: HomeProps) {
             <span className="local-pill"><LockKeyhole size={13} /> local analysis</span>
           </div>
 
-          <label className="field-label" htmlFor="harness">1. Pick your agent</label>
-          <div className="select-shell">
-            <select id="harness" value={harness} onChange={(event) => setHarness(event.target.value as HarnessId)}>
+          <fieldset className="harness-picker">
+            <legend className="field-label">1. Pick your agent</legend>
+            <div className="harness-options">
               {harnesses.map((item) => (
-                <option key={item.id} value={item.id}>{item.name} · {item.detail}</option>
+                <label className="harness-option" data-harness={item.id} key={item.id} title={item.detail}>
+                  <input
+                    type="radio"
+                    name="harness"
+                    value={item.id}
+                    checked={harness === item.id}
+                    aria-label={`${item.name}, ${item.detail}`}
+                    onChange={() => setHarness(item.id)}
+                  />
+                  <span className="harness-option__face">
+                    <span className="harness-option__mark"><HarnessMark id={item.id} /></span>
+                    <span className="harness-option__name">{item.name}</span>
+                  </span>
+                </label>
               ))}
-            </select>
-            <ChevronDown size={18} aria-hidden="true" />
-          </div>
+            </div>
+          </fieldset>
 
           <div className="field-row">
             <span className="field-label">2. Run one command</span>

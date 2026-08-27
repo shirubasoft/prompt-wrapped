@@ -5,6 +5,7 @@ import tempfile
 import unittest
 import zlib
 from pathlib import Path
+from unittest.mock import patch
 
 
 COLLECTOR_PATH = Path(__file__).parents[1] / "public" / "collector.py"
@@ -61,6 +62,12 @@ def report():
 
 
 class CollectorTests(unittest.TestCase):
+    def test_supported_harnesses_match_the_public_picker(self):
+        self.assertEqual(
+            collector.HARNESSES,
+            {"agy", "claude", "codex", "copilot", "opencode", "qwen"},
+        )
+
     def test_prompt_constrains_phone_sized_display_copy(self):
         prompt = " ".join(collector.ANALYSIS_PROMPT.split())
         self.assertIn("Keep rating labels at 28 characters or fewer", prompt)
@@ -69,6 +76,31 @@ class CollectorTests(unittest.TestCase):
     def test_parses_structured_harness_wrapper(self):
         wrapped = json.dumps({"type": "result", "structured_output": report()})
         self.assertEqual(collector.parse_report(wrapped)["developer"]["displayName"], "Dev")
+
+    def test_parses_qwen_structured_result_wrapper(self):
+        wrapped = json.dumps([{"type": "result", "structured_result": report()}])
+        self.assertEqual(collector.parse_report(wrapped)["developer"]["displayName"], "Dev")
+
+    def test_agy_runner_uses_read_only_plan_mode(self):
+        with patch.object(collector, "run_command", return_value="{}") as run_command:
+            collector.run_harness("agy", "prompt")
+        command = run_command.call_args.args[0]
+        self.assertIn("--mode=plan", command)
+        self.assertNotIn("--dangerously-skip-permissions", command)
+
+    def test_qwen_runner_excludes_mutating_tools(self):
+        with patch.object(collector, "run_command", return_value="{}") as run_command:
+            collector.run_harness("qwen", "prompt")
+        command = run_command.call_args.args[0]
+        self.assertIn("plan", command)
+        self.assertIn("shell,write,edit,agent", command)
+
+    def test_copilot_runner_denies_writes_and_shell(self):
+        with patch.object(collector, "run_command", return_value="{}") as run_command:
+            collector.run_harness("copilot", "prompt")
+        command = run_command.call_args.args[0]
+        self.assertIn("--deny-tool=write", command)
+        self.assertIn("--deny-tool=shell", command)
 
     def test_python_encoding_matches_zlib_contract(self):
         encoded = collector.encode_report(report())

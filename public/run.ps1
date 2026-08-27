@@ -1,5 +1,5 @@
 param(
-  [ValidateSet('codex', 'claude', 'gemini', 'opencode')]
+  [ValidateSet('codex', 'claude', 'opencode', 'copilot', 'agy', 'qwen')]
   [string]$Harness = 'codex',
   [string]$BaseUrl = 'https://shiruba.software/prompt-wrapped'
 )

@@ -29,7 +29,7 @@ THEMES = {
     "blueprint",
     "pixel-arcade",
 }
-HARNESSES = {"codex", "claude", "gemini", "opencode"}
+HARNESSES = {"agy", "claude", "codex", "copilot", "opencode", "qwen"}
 
 
 def string_schema(max_length: int) -> dict[str, Any]:
@@ -204,8 +204,11 @@ Inspect schemas before trusting a record role because formats change. Common sou
   workspaceStorage chatSessions. Query only conversation tables and deduplicate editor copies.
 - Cursor: state.vscdb cursorDiskKV bubble records and ~/.cursor/projects/*/agent-transcripts/*.txt.
   Verify bubble roles locally. Ignore auth keys, code-tracking stores, plans, and browser logs.
-- Gemini and Antigravity: CLI history and records explicitly typed USER_INPUT from USER_EXPLICIT.
-  Do not invent a protobuf schema or substitute generated brain/task Markdown for human prompts.
+- Legacy Gemini CLI and Antigravity: CLI history and records explicitly typed USER_INPUT from
+  USER_EXPLICIT. Do not invent a protobuf schema or substitute generated brain/task Markdown for
+  human prompts.
+- Qwen Code: project-scoped JSONL under ~/.qwen/projects/*/chats. Separate direct user turns from tool
+  traffic, compressed history, subagents, checkpoints, and channel records.
 - Other agents: use a bounded home-directory search. Establish direct-human provenance, root versus
   subagent topology, duplicates, auth separation, dates, and usable counts before relying on a store.
 - User-authored AGENTS.md files, skills, and Git history may corroborate direct prompts. They do not
@@ -397,8 +400,24 @@ def run_harness(harness: str, prompt: str) -> str:
             )
             return raw
 
-        if harness == "gemini":
-            return run_command(["gemini", "--output-format", "json", "--prompt", prompt])
+        if harness == "agy":
+            return run_command(
+                [
+                    "agy", "-p", prompt, "--mode=plan", "--add-dir", str(Path.home()),
+                    "--output-format", "json", "--json-schema", str(schema_path),
+                    "--print-timeout", "30m",
+                ]
+            )
+
+        if harness == "copilot":
+            schema_prompt = f"{prompt}\n\nOUTPUT JSON SCHEMA\n{json.dumps(REPORT_SCHEMA)}"
+            return run_command(
+                [
+                    "copilot", "-p", schema_prompt, "-s", "--no-ask-user", "--allow-all-paths",
+                    "--allow-tool=read", "--deny-tool=write", "--deny-tool=shell",
+                    "--deny-tool=url", "--deny-tool=memory",
+                ]
+            )
 
         if harness == "opencode":
             safe_env = os.environ.copy()
@@ -413,8 +432,21 @@ def run_harness(harness: str, prompt: str) -> str:
                 }
             )
             return run_command(
-                ["opencode", "run", "--format", "json", "--agent", "plan", prompt],
+                [
+                    "opencode", "run", "--format", "json", "--agent", "plan",
+                    f"{prompt}\n\nOUTPUT JSON SCHEMA\n{json.dumps(REPORT_SCHEMA)}",
+                ],
                 env=safe_env,
+            )
+
+        if harness == "qwen":
+            return run_command(
+                [
+                    "qwen", "-p", prompt, "--json-schema", f"@{schema_path}", "--safe-mode",
+                    "--approval-mode", "plan", "--exclude-tools", "shell,write,edit,agent",
+                    "--include-directories", str(Path.home()), "--max-tool-calls", "200",
+                    "--max-wall-time", "30m",
+                ]
             )
 
     raise CollectorError(f"Unsupported harness: {harness}")
@@ -423,7 +455,9 @@ def run_harness(harness: str, prompt: str) -> str:
 def nested_values(value: Any) -> Iterable[Any]:
     yield value
     if isinstance(value, dict):
-        priority = ["structured_output", "response", "result", "output_text", "text", "content"]
+        priority = [
+            "structured_output", "structured_result", "response", "result", "output_text", "text", "content"
+        ]
         for key in priority:
             if key in value:
                 yield from nested_values(value[key])

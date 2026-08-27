@@ -19,7 +19,7 @@ export const demoWrapped: WrappedData = {
       { name: 'Claude Code', prompts: 912, sessions: 251, status: 'analyzed' },
       { name: 'Cursor', prompts: 146, sessions: 45, status: 'analyzed' },
       { name: 'GitHub Copilot', prompts: 79, sessions: 28, status: 'analyzed' },
-      { name: 'Gemini CLI', prompts: 9, sessions: 4, status: 'partial' },
+      { name: 'Antigravity CLI', prompts: 9, sessions: 4, status: 'partial' },
       { name: 'ChatGPT', prompts: null, sessions: null, status: 'unavailable' },
     ],
     totalPrompts: 1799,
