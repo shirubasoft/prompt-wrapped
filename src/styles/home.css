@@ -361,25 +361,24 @@
 
 .harness-option__mark {
   display: grid;
-  width: 38px;
-  height: 38px;
-  color: var(--harness-accent);
+  width: 42px;
+  height: 42px;
+  padding: 5px;
+  overflow: hidden;
+  background: #fff9e0;
+  border: 1px solid rgba(29, 23, 64, 0.34);
   place-items: center;
 }
 
-.harness-option__mark svg {
+.harness-option__mark svg,
+.harness-option__mark img {
+  display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.4;
+  object-fit: contain;
 }
 
-.harness-option[data-harness='agy'] circle { fill: currentColor; stroke: none; }
-.harness-option[data-harness='qwen'] path { fill: currentColor; stroke: none; }
+.harness-option[data-harness='agy'] .harness-option__mark { padding: 0; }
 
 .harness-option__name {
   overflow: hidden;
@@ -401,8 +400,6 @@
   box-shadow: 4px 4px 0 var(--harness-accent);
   transform: translate(-2px, -2px);
 }
-
-.harness-option input:checked + .harness-option__face .harness-option__mark { color: #e6ff4e; }
 
 .harness-option input:focus-visible + .harness-option__face {
   outline: 3px solid #ff543b;
