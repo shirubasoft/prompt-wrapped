@@ -8,6 +8,7 @@ import base64
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -30,6 +31,20 @@ THEMES = {
     "pixel-arcade",
 }
 HARNESSES = {"agy", "claude", "codex", "copilot", "opencode", "qwen"}
+
+
+def status(message: str) -> None:
+    print(message, file=sys.stderr, flush=True)
+
+
+def visible_command(command: list[str]) -> str:
+    visible = []
+    for argument in command:
+        if "\n" in argument or len(argument) > 160:
+            visible.append("<analysis-input>")
+        else:
+            visible.append(argument)
+    return shlex.join(visible)
 
 
 def string_schema(max_length: int) -> dict[str, Any]:
@@ -339,7 +354,11 @@ def run_command(command: list[str], prompt: str | None = None, env: dict[str, st
     executable = command[0]
     if shutil.which(executable) is None:
         raise CollectorError(f"{executable!r} is not installed or is not on PATH.")
-    print(f"\nRunning {executable} in read-only analysis mode. This can take a while...", file=sys.stderr)
+    status(f"\n[analysis 1/3] Starting {executable} in read-only mode.")
+    status(f"               Command: {visible_command(command)}")
+    if prompt is not None:
+        status("               Input: analysis prompt on stdin")
+    status("               Reading local agent history can take a while.")
     try:
         result = subprocess.run(
             command,
@@ -641,12 +660,18 @@ def main() -> int:
 
     try:
         if args.input:
+            status(f"\nLoading the existing report from {args.input}.")
             report = validate_report(json.loads(Path(args.input).read_text(encoding="utf-8")))
         else:
             raw = run_harness(args.harness, prompt_for(args.harness))
+            status("[analysis 2/3] Validating the generated report...")
             report = parse_report(raw)
 
         output = unique_output_directory(args.output_dir)
+        if args.input:
+            status(f"Writing the report and skills to {output}...")
+        else:
+            status(f"[analysis 3/3] Writing the report and skills to {output}...")
         write_outputs(report, output)
         base_url = args.base_url.rstrip("/") + "/"
         url = f"{base_url}#data={encode_report(report)}"
