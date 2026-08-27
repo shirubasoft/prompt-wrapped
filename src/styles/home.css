@@ -663,11 +663,17 @@
   .site-nav { min-height: 66px; }
   .hero-section { display: block; min-height: auto; padding: 42px 0 60px; }
   .hero-copy { position: relative; }
-  .hero-copy h1 { font-size: clamp(3.7rem, 17vw, 6rem); }
+  .hero-copy h1 {
+    font-size: clamp(3.7rem, 17vw, 6rem);
+    line-height: 0.82;
+  }
   .hero-copy h1 span:last-child {
     width: 100%;
-    font-size: clamp(2.75rem, 12.4vw, 4.4rem);
+    font-size: clamp(2.05rem, 10.9vw, 3.9rem);
+    letter-spacing: -0.045em;
+    line-height: 0.9;
     white-space: nowrap;
+    -webkit-text-stroke-width: 1.5px;
     transform: translateX(0.03em);
   }
   .hero-lede { max-width: 90%; margin: 26px 0 22px; font-size: 0.9rem; }
