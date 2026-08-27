@@ -138,6 +138,8 @@ export function Home({ onOpen }: HomeProps) {
   }, [])
 
   const command = commandFor(harness, os)
+  const harnessName = harnesses.find((item) => item.id === harness)?.name ?? harness
+  const runnerName = os === 'windows' ? 'run.ps1' : 'run.sh'
 
   async function copyCommand() {
     await navigator.clipboard.writeText(command)
@@ -250,10 +252,19 @@ export function Home({ onOpen }: HomeProps) {
               {copied ? <Check size={18} /> : <Clipboard size={18} />}
             </button>
           </div>
-          <p className="runner-note">
-            The script asks your installed agent to read local conversation stores in read-only mode. It saves the
-            report and new <code>SKILL.md</code> files beside the terminal where you run it.
-          </p>
+          <details className="runner-details" open>
+            <summary>What this command runs</summary>
+            <ol>
+              <li>Downloads <code>collector.py</code> from this site into a temporary folder.</li>
+              <li>Starts {harnessName} in read-only analysis mode to inspect local agent history.</li>
+              <li>Validates the result, then writes the report and new <code>SKILL.md</code> files in your current directory.</li>
+            </ol>
+            <p>
+              Nothing is installed. The temporary collector is deleted when the run ends.{' '}
+              <a href={`${installBase}/${runnerName}`}>Review {runnerName}</a>
+              {' '}or <a href={`${installBase}/collector.py`}>collector.py</a> first.
+            </p>
+          </details>
 
           <div className="runner-divider"><span>or</span></div>
           <button className="json-button" type="button" onClick={() => fileInput.current?.click()}>

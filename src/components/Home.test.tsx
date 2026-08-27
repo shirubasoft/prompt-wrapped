@@ -43,6 +43,22 @@ describe('Home', () => {
     expect(agy?.querySelector('.harness-option__agy-mark')).toBeInTheDocument()
   })
 
+  it('explains what the command downloads, runs, and writes', async () => {
+    const user = userEvent.setup()
+    render(<Home onOpen={vi.fn()} />)
+
+    const details = screen.getByText('What this command runs').closest('details')
+    expect(details).toHaveTextContent(/downloads collector\.py/i)
+    expect(details).toHaveTextContent(/starts Codex in read-only analysis mode/i)
+    expect(details).toHaveTextContent(/nothing is installed/i)
+    expect(screen.getByRole('link', { name: 'Review run.sh' })).toHaveAttribute('href', expect.stringMatching(/run\.sh$/))
+
+    await user.click(screen.getByRole('radio', { name: /Claude Code/ }))
+    await user.click(screen.getByRole('button', { name: 'Windows' }))
+    expect(details).toHaveTextContent(/starts Claude Code in read-only analysis mode/i)
+    expect(screen.getByRole('link', { name: 'Review run.ps1' })).toHaveAttribute('href', expect.stringMatching(/run\.ps1$/))
+  })
+
   it('opens the reference story without a model run', async () => {
     const user = userEvent.setup()
     const onOpen = vi.fn()
