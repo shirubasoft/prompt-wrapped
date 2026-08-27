@@ -114,11 +114,11 @@
 
 .hero-copy h1 {
   display: grid;
+  row-gap: 0.04em;
   margin: 0;
   font-size: clamp(5rem, 10.2vw, 10.2rem);
   font-weight: 950;
-  letter-spacing: -0.105em;
-  line-height: 0.7;
+  line-height: 0.78;
   text-transform: uppercase;
 }
 
@@ -129,12 +129,18 @@
 
 .hero-copy h1 span:first-child {
   color: #f9f1df;
+  letter-spacing: -0.075em;
+  word-spacing: 0.08em;
 }
 
 .hero-copy h1 span:last-child {
-  color: #100c18;
-  -webkit-text-stroke: 2px #e6ff4e;
-  transform: translateX(0.2em);
+  max-width: 100%;
+  color: #e6ff4e;
+  font-size: 0.72em;
+  letter-spacing: -0.015em;
+  line-height: 0.98;
+  text-shadow: 3px 3px 0 #7456d8;
+  -webkit-text-stroke: 1px #100c18;
 }
 
 .hero-lede {
@@ -665,16 +671,16 @@
   .hero-copy { position: relative; }
   .hero-copy h1 {
     font-size: clamp(3.7rem, 17vw, 6rem);
-    line-height: 0.82;
+    line-height: 0.86;
   }
   .hero-copy h1 span:last-child {
-    width: 100%;
-    font-size: clamp(2.05rem, 10.9vw, 3.9rem);
-    letter-spacing: -0.045em;
-    line-height: 0.9;
+    width: max-content;
+    font-size: clamp(1.9rem, 9.6vw, 3.4rem);
+    letter-spacing: 0;
+    line-height: 1;
     white-space: nowrap;
-    -webkit-text-stroke-width: 1.5px;
-    transform: translateX(0.03em);
+    text-shadow: 2px 2px 0 #7456d8;
+    -webkit-text-stroke-width: 1px;
   }
   .hero-lede { max-width: 90%; margin: 26px 0 22px; font-size: 0.9rem; }
 
