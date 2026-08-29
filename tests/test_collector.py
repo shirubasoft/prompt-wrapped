@@ -153,7 +153,7 @@ class CollectorTests(unittest.TestCase):
                 "#!/bin/sh\n"
                 "if [ \"$1\" = \"-c\" ]; then exit 0; fi\n"
                 "if [ \"$1\" = \"--version\" ]; then echo 'Python 3.12.0'; exit 0; fi\n"
-                "printf 'fake collector started\\n' >&2\n",
+                "printf 'fake collector started: %s\\n' \"$*\" >&2\n",
                 encoding="utf-8",
             )
             python.chmod(0o755)
@@ -188,6 +188,7 @@ class CollectorTests(unittest.TestCase):
         self.assertLess(result.stderr.index("[setup 1/3]"), result.stderr.index("[setup 2/3]"))
         self.assertLess(result.stderr.index("[setup 2/3]"), result.stderr.index("[setup 3/3]"))
         self.assertIn("fake collector started", result.stderr)
+        self.assertIn("--base-url https://assets.example.test --harness claude", result.stderr)
 
     def test_powershell_runner_has_the_same_visible_setup_stages(self):
         runner = POWERSHELL_RUNNER_PATH.read_text(encoding="utf-8")
@@ -196,6 +197,7 @@ class CollectorTests(unittest.TestCase):
         self.assertIn("Write-Host '  Access: read-only analysis'", runner)
         for stage in ("[setup 1/3]", "[setup 2/3]", "[setup 3/3]"):
             self.assertIn(stage, runner)
+        self.assertIn("--base-url $BaseUrl --harness $Harness", runner)
         self.assertLess(runner.index("[setup 1/3]"), runner.index("[setup 2/3]"))
         self.assertLess(runner.index("[setup 2/3]"), runner.index("[setup 3/3]"))
 

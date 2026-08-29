@@ -41,6 +41,21 @@ python3 public/collector.py --prompt-only --harness codex >/dev/null
 
 The Pages workflow runs the first three checks before every deployment.
 
+## Staging
+
+The official [`shirubasoft.github.io`](https://github.com/shirubasoft/shirubasoft.github.io) repository owns the combined Pages artifact:
+
+- `main` is published at [shiruba.software/prompt-wrapped](https://shiruba.software/prompt-wrapped/).
+- `staging` is published at [shiruba.software/prompt-wrapped/staging](https://shiruba.software/prompt-wrapped/staging/).
+
+This repository validates both builds but does not deploy Pages. After pushing either branch, publish both environments from the official repository:
+
+```bash
+gh workflow run deploy.yml --repo shirubasoft/shirubasoft.github.io
+```
+
+The staging build has a visible label, and its installer keeps generated report links on the staging URL. Each official deployment checks out both branches, so production and staging are always published together. The staging URL is public, like the production site.
+
 ## Project map
 
 - [`public/collector.py`](public/collector.py) contains the local prompt, harness adapters, validation, skill writer, and URL encoder.

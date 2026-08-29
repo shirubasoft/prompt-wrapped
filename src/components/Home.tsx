@@ -82,7 +82,9 @@ function HarnessMark({ id }: { id: HarnessId }) {
   )
 }
 
-const installBase = 'https://shiruba.software/prompt-wrapped'
+const productionInstallBase = 'https://shiruba.software/prompt-wrapped'
+const installBase = (import.meta.env.VITE_PUBLIC_URL || productionInstallBase).replace(/\/$/, '')
+const isStaging = import.meta.env.VITE_DEPLOY_ENV === 'staging'
 let demoUrl: string | undefined
 
 function getDemoUrl(): string {
@@ -96,9 +98,9 @@ function detectOs(): OsId {
 
 function commandFor(harness: HarnessId, os: OsId): string {
   if (os === 'windows') {
-    return `$s=(irm '${installBase}/run.ps1'); & ([scriptblock]::Create($s)) -Harness ${harness}`
+    return `$s=(irm '${installBase}/run.ps1'); & ([scriptblock]::Create($s)) -Harness ${harness} -BaseUrl '${installBase}'`
   }
-  return `curl -fsSL ${installBase}/run.sh | sh -s -- ${harness}`
+  return `curl -fsSL ${installBase}/run.sh | PROMPT_WRAPPED_ASSET_URL=${installBase} sh -s -- ${harness}`
 }
 
 type HomeProps = {
@@ -171,10 +173,13 @@ export function Home({ onOpen }: HomeProps) {
           <span className="brand__mark">P</span>
           <span>prompt-wrapped</span>
         </a>
-        <a className="nav-link" href="https://github.com/shirubasoft/prompt-wrapped">
-          <Code2 size={18} aria-hidden="true" />
-          Source
-        </a>
+        <div className="site-nav__links">
+          {isStaging && <span className="staging-pill">staging</span>}
+          <a className="nav-link" href="https://github.com/shirubasoft/prompt-wrapped">
+            <Code2 size={18} aria-hidden="true" />
+            Source
+          </a>
+        </div>
       </nav>
 
       <section className="hero-section">

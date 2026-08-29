@@ -60,6 +60,24 @@
   text-decoration: none;
 }
 
+.site-nav__links {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.staging-pill {
+  padding: 5px 8px;
+  color: #100c18;
+  background: #e6ff4e;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .brand__mark {
   display: grid;
   width: 32px;

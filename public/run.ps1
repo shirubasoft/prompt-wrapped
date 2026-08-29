@@ -32,8 +32,8 @@ try {
   Invoke-WebRequest -UseBasicParsing "$BaseUrl/collector.py" -OutFile $collector
 
   Write-Host "[setup 3/3] Starting the local collector with $Harness..."
-  if ($python -eq 'py') { & $python -3 $collector --harness $Harness }
-  else { & $python $collector --harness $Harness }
+  if ($python -eq 'py') { & $python -3 $collector --base-url $BaseUrl --harness $Harness }
+  else { & $python $collector --base-url $BaseUrl --harness $Harness }
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 finally {
